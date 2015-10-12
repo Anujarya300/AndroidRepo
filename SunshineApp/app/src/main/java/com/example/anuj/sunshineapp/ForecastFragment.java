@@ -1,8 +1,10 @@
 package com.example.anuj.sunshineapp;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.text.method.HideReturnsTransformationMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,21 +15,26 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.SimpleTimeZone;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment {
 
+    ArrayAdapter<String> stringArrayAdapter;
     public ForecastFragment() {
     }
 
@@ -49,6 +56,9 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.action_refresh){
+            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+            String postelCode = "94043";
+           fetchWeatherTask.execute(postelCode);
             return true;
         }
 
@@ -58,12 +68,12 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        hasOptionsMenu();
+        //hasOptionsMenu();
         View rootView = inflater.inflate(R.layout.forecast_fragment, container, false);
         String[] strings = CreateArrayStringList();
         List<String> stringArrayList = new ArrayList<String>(Arrays.asList(strings));
 
-        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast,
+        stringArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview, stringArrayList);
         ListView listView = (ListView) rootView.findViewById(R.id.listView_forecast);
         listView.setAdapter(stringArrayAdapter);
@@ -94,23 +104,53 @@ public class ForecastFragment extends Fragment {
     }
 
 
-    public class FetchWeatherTask extends AsyncTask<String, Void, String>
+    public class FetchWeatherTask extends AsyncTask<String, Void, String[]>
     {
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
-        protected String doInBackground(String... params) {
-            String forecastJsonStr = null;
-            if(!httpRestApiCall(forecastJsonStr))
+        @Override
+        protected String[] doInBackground(String... params) {
+            if(params.length == 0)
                 return null;
-            else return forecastJsonStr;
+            String postalCode = params[0];
+            String[] forecastJsonStrArr = null;
+            return httpRestApiCall(postalCode);
+
         }
 
-        private boolean httpRestApiCall(String forecastJsonStr) {
+        @Override
+        protected void onPostExecute(String[] strings) {
+            if(strings != null)
+            {
+                stringArrayAdapter.clear();
+                for(String dayForecastStr: strings)
+                {
+                    stringArrayAdapter.add(dayForecastStr);
+                }
+            }
+        }
+
+        private String[] httpRestApiCall(String postalCode) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
+            String forecastJsonStr = null;
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
+            Uri.Builder uriBuilder = new Uri.Builder();
+            uriBuilder.scheme("http")
+                    .authority("api.openweathermap.org")
+                    .appendPath("data")
+                    .appendPath("2.5")
+                    .appendPath("forecast")
+                    .appendPath("daily")
+                    .appendQueryParameter("q",postalCode)
+                    .appendQueryParameter("mode", "json")
+                    .appendQueryParameter("units", "metric")
+                    .appendQueryParameter("cnt", "7")
+                    .appendQueryParameter("APPID","cb6080db92d88726d09b48aab743f818");
 
+            //String urlApi = "http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7&APPID=cb6080db92d88726d09b48aab743f818";
+            String urlApi = uriBuilder.build().toString();
             // Will contain the raw JSON response as a string.
             forecastJsonStr = null;
 
@@ -118,7 +158,8 @@ public class ForecastFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
+                //URL url = new URL(urlApi);
+                URL url = buildUrl(postalCode);
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -130,7 +171,7 @@ public class ForecastFragment extends Fragment {
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
                     // Nothing to do.
-                    return false;
+                    return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -144,14 +185,21 @@ public class ForecastFragment extends Fragment {
 
                 if (buffer.length() == 0) {
                     // Stream was empty.  No point in parsing.
-                    return false;
+                    return null;
                 }
                 forecastJsonStr = buffer.toString();
+                Log.i(LOG_TAG, forecastJsonStr);
+
+                try {
+                    return WeatherDataParser.getWeatherDataFromJson(forecastJsonStr, 7);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
                 // to parse it.
-                return false;
+                return null;
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
@@ -164,7 +212,40 @@ public class ForecastFragment extends Fragment {
                     }
                 }
             }
-            return true;
+            return null;
+        }
+
+        private URL buildUrl(String postalCode)
+        {
+            URL url = null;
+            String format = "json";
+            String units = "metric";
+            int numDays = 7;
+            String appId = "cb6080db92d88726d09b48aab743f818";
+
+            final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
+            final String QUERY_PARAM = "q";
+            final String FORMAT_PARAM = "mode";
+            final String UNITS_PARAM = "units";
+            final String DAYS_PARAM = "cnt";
+            final String APPID = "APPID";
+
+            Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+                    .appendQueryParameter(QUERY_PARAM, postalCode)
+                    .appendQueryParameter(FORECAST_BASE_URL, format)
+                    .appendQueryParameter(UNITS_PARAM, units)
+                    .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                    .appendQueryParameter(APPID, appId)
+                    .build();
+            try {
+                url = new URL(builtUri.toString());
+                Log.i(LOG_TAG, "Built URI" + builtUri.toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            return url;
+
         }
     }
 
