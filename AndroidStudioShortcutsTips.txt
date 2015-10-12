@@ -1,0 +1,31 @@
+Android studio tips:-
+--------------------------------------------------------
+1. CTRL+Q   :- 		Quick documentation
+2. CTRL+F12 :- 		Navigate to recently edited file
+3. Shift+F6 :- 		Rename class. To try it, place the caret at the symbol you want to rename, and press Shift+F6
+4. Ctrl+O   :  		override methods of the base class
+5. Ctrl+I   :- 		implement methods of the interfaces
+6. Ctrl+Shift+Space :-	* SmartType code completion. ex- Calendar now = new GregorianCalendar(T...press Ctrl+Shift+Space.)
+			  gives top five results in green background.
+			* new keyword
+			* to cast an expression value to the required type
+7. Alt+F1   :-		quickly select the currently edited element (class, file, method or field) in any view (Project view, Structure view or other)
+8. F12	    :-		moves the focus from the editor to the last focused tool window
+9. Ctrl+Alt+T :-	Code | Surround With and choose try / catch or any from the list
+10.Ctrl+Alt+B :-	To navigate to the implementation(s) of an abstract method, position the caret at its usage or its name in the declaration
+11.Ctrl+W   :-		(extend selection) in the editor selects the word at the caret and then selects expanding areas of the source code
+12.Ctrl+Alt+V :-	The Extract Variable refactoring helps you simplify complicated statements in your code
+13.Ctrl+Shift+Slash :-	encloses the selected block in a block comment (/*...*/)
+14.Shift+F1 :-		To open your browser with documentation for the element at the editor's caret
+15.Ctrl+D   :-		in the editor duplicates the selected block or the current line when no block is selected.
+16.Ctrl+P   :-		If the cursor is between the parentheses of a method call, pressing Ctrl+P brings up a list of valid parameters
+17.Ctrl+Shift+F7 :-	to quickly highlight usages of some variable in the current file.
+18.Alt+Q   :-		to see the declaration of the current method without the need to scroll to it.
+19.Ctrl+E   :-		brings a popup list of the recently visited files. Choose the desired file and press Enter to open it.
+20.Alt+Up/Down :-	Use Alt+Up and Alt+Down keys to quickly move between methods in the editor.
+21.Ctrl+Shift+J :-	shortcut joins two lines into one and removes unnecessary space to match your code style.
+22.Ctrl+H   :-		To see the inheritance hierarchy for a selected class
+23.Alt+Shift+C :-	to quickly review your recent changes to the project.
+24.Ctrl+Shift+Enter :-	to complete a current statement such as if, do-while, try-catch, return (or a method call) into a syntactically
+			correct construct (e.g. add curly braces).
+25.Ctrl+Alt+Shift :	Launch setting window
