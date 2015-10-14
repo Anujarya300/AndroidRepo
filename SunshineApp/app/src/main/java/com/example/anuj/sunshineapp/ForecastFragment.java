@@ -1,10 +1,11 @@
 package com.example.anuj.sunshineapp;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.text.method.HideReturnsTransformationMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,8 +13,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
@@ -27,7 +31,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.SimpleTimeZone;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -57,7 +60,7 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if(id == R.id.action_refresh){
             FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            String postelCode = "94043";
+            String postelCode = "411045";
            fetchWeatherTask.execute(postelCode);
             return true;
         }
@@ -77,8 +80,25 @@ public class ForecastFragment extends Fragment {
                 R.id.list_item_forecast_textview, stringArrayList);
         ListView listView = (ListView) rootView.findViewById(R.id.listView_forecast);
         listView.setAdapter(stringArrayAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView textView = (TextView) view;
+                if(textView == null)
+                    return;
+//                Context context = getActivity().getApplicationContext();
+//                CharSequence text = textView.getText();
+//                int duration = Toast.LENGTH_SHORT;
+//
+//                Toast toast = Toast.makeText(context, text, duration);
+//                toast.show();
 
+                Intent intent = new Intent(getActivity(),DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, textView.getText());
+                startActivity(intent);
 
+            }
+        });
         return rootView;
     }
 

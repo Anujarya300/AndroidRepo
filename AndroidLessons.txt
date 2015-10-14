@@ -1,0 +1,11 @@
+Android Lessons
+------------------------------------------
+1. Activity
+2. Fragment
+3. Adapter
+4. Http/JSON module
+5. AndroidMenifest file/Set user permission
+6. build.gradle module
+7. Menu
+8. Intent
+9. ListView
