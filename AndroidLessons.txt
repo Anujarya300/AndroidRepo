@@ -9,3 +9,4 @@ Android Lessons
 7. Menu
 8. Intent
 9. ListView
+10. Settings

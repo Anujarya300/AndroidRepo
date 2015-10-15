@@ -1,5 +1,8 @@
 package com.example.anuj.sunshineapp;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SharedPreferences prefs = getSharedPreferences("pref_general", Context.MODE_PRIVATE);
+        String location = "";
+        location = prefs.getString(getString(R.string.pref_location_key),getString(R.string.pref_location_default));
     }
 
 
@@ -38,9 +44,10 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
-
-        return super.onOptionsItemSelected(item);
+        super.onOptionsItemSelected(item);
+        return true;
     }
 }
